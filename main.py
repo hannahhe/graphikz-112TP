@@ -117,7 +117,7 @@ def detectPointsAndAxes(argv):
     #when you're all done:
     laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
     #print(laTexCode) 
-    with open('yourLatexFile.txt', 'w') as fp:
+    with open('yourLatexFile.txt', 'w') as fp: #write to a txt file, and then to tex file at the end
         fp.write(laTexCode)
     cv.imshow('linesAndPoints.jpg',src)
     cv.waitKey(0)
