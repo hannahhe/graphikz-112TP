@@ -26,7 +26,7 @@ def laTexPoints(laTex, circles, height, width, origin):
 
 
 def laTexAxes(laTex, axes, height, width, origin): #need to expand beyond just quadrants
-    print(axes)
+    #print(axes)
     axesLatex = ""
     defaultLength = 5
     if(len(axes) == 2 and origin[0] < width/2 and origin[1] > height/2): #first quad
@@ -44,7 +44,7 @@ def laTexAxes(laTex, axes, height, width, origin): #need to expand beyond just q
 def detectPointsAndAxes(argv):
     
     #what file/picture will it look at?
-    default_file =  "C:/Users/hanna/Desktop/TPTechDemo/HoughTest1.png"
+    default_file =  "C:/Users/hanna/Documents/15-112 HW/TermProject/graphikz-112TP/HoughTest.png"
     filename = argv[0] if len(argv) > 0 else default_file
     # Loads an image
     src = cv.imread(filename, cv.IMREAD_COLOR)
@@ -110,13 +110,15 @@ def detectPointsAndAxes(argv):
         cartCoord.append((x,y))
     origin = (cartCoord[1][0], cartCoord[0][1])
     
+    
     laTexCode = "\\begin{figure}"+"\n"+"\centering" + "\n" + "\\begin{tikzpicture}"+"\n"
     laTexCode += laTexAxes(laTexCode, lines, height, width, origin) #add axes
-    print(laTexCode)
-    #laTexCode += laTexPoints(laTexCode, circles, height, width, origin) #add points
+    laTexCode += laTexPoints(laTexCode, circles, height, width, origin) #add points
     #when you're all done:
     laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
-    #print(laTexCode)  
+    #print(laTexCode) 
+    with open('yourLatexFile.txt', 'w') as fp:
+        fp.write(laTexCode)
     cv.imshow('linesAndPoints.jpg',src)
     cv.waitKey(0)
     
