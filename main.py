@@ -10,7 +10,7 @@ from tkinter import ttk
 import tkinter as ttk
 
 class ScatterPlot(object):
-    def laTexPoints(self,laTex, circles, width, origin, xLength, yLength):
+    def laTexPoints(self,laTex, circles, width, height, origin, xLength, yLength):
         pointLaTex = ""
         defaultColor = "black"
         size = 5
@@ -33,6 +33,17 @@ class ScatterPlot(object):
                 r = circles[0][i][2] //2 #might need to scale this later, at the moment, just halve it
                 newX = -(xLength*(oldX))/xLen
                 newY = yLength - (yLength*(oldY))/yLen
+                pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(r)+"pt] at ("+str(newX)+","+str(newY)+") {};" + "\n"
+        elif(xLength < 0 and yLength < 0): #third quad
+            xLen = origin[0]
+            yLen = height - origin[1]
+            print(yLen)
+            for i in range(0, len(circles[0])):
+                oldX = circles[0][i][0] - origin[0]
+                oldY = circles[0][i][1]
+                r = circles[0][i][2] //2 #might need to scale this later, at the moment, just halve it
+                newX = -(xLength*(oldX))/xLen
+                newY = (yLength*(oldY))/yLen
                 pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(r)+"pt] at ("+str(newX)+","+str(newY)+") {};" + "\n"
         return pointLaTex
 
@@ -164,7 +175,7 @@ class ScatterPlot(object):
             y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
             print("x-length",x_axis_length)
             print("y-length", y_axis_length)
-            laTexCode += self.laTexPoints(laTexCode, circles, width, origin, x_axis_length, y_axis_length) #add points
+            laTexCode += self.laTexPoints(laTexCode, circles, width, height, origin, x_axis_length, y_axis_length) #add points
             #when you're all done:
             laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
             #print(laTexCode)
