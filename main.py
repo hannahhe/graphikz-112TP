@@ -5,12 +5,12 @@ import math
 import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter import *
-from PIL import ImageTk,Image 
-from tkinter import ttk 
+from PIL import ImageTk,Image
+from tkinter import ttk
 import tkinter as ttk
 
 class ScatterPlot(object):
-    def laTexPoints(self,laTex, circles, height, width, origin): 
+    def laTexPoints(self,laTex, circles, height, width, origin):
         pointLaTex = ""
         defaultColor = "black"
         size = 5
@@ -20,16 +20,16 @@ class ScatterPlot(object):
         xLen = width - origin[0]
         yLen = origin[1]
         for i in range(0, len(circles[0])):
-            oldX = circles[0][i][0]
-            oldY = circles[0][i][1] 
+            oldX = circles[0][i][0] - origin[0]
+            oldY = circles[0][i][1]
             r = circles[0][i][2] //2 #might need to scale this later, at the moment, just halve it
             newX = (5*(oldX))/xLen
         # print("newX",newX)
             newY = 5 - (5*(oldY))/yLen
             pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(r)+"pt] at ("+str(newX)+","+str(newY)+") {};" + "\n"
         return pointLaTex
-    
-    
+
+
     def laTexAxes(self,laTex, axes, height, width, origin): #need to expand beyond just quadrants
         #print(axes)
         axesLatex = ""
@@ -44,8 +44,8 @@ class ScatterPlot(object):
         elif(len(axes) == 2 and origin[0] < width/2 and origin[1] < height/2): #fourth quad
             axesLatex += "\draw[->] (0,0) -- ("+str(defaultLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,-"+str(defaultLength)+");" + "\n"
         return axesLatex
-    
-    
+
+
     def detectPointsAndAxes(self,argv, picFile):
         #what file/picture will it look at?
         if(picFile != ""):
@@ -54,29 +54,29 @@ class ScatterPlot(object):
             filename = argv[0] if len(argv) > 0 else default_file
         # Loads an image
             src = cv.imread(filename, cv.IMREAD_COLOR)
-        
+
             height,width, channels = src.shape
-        
+
         # Check if image is loaded fine
             if src is None:
                 print ('Error opening image!')
                 print ('Usage: hough_circle.py [image_name -- default ' + default_file + '] \n')
                 return -1
-        
-        
+
+
             gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY) #change the color scale to grayscale
-        
-        
+
+
             gray = cv.medianBlur(gray, 5) #reduce noise and false positives
-        
-        
+
+
             rows = gray.shape[0]
             circles = cv.HoughCircles(gray, cv.HOUGH_GRADIENT, 1, rows / 12, #change this value to detect circles with different distances to each other
                                 param1=100, param2=20,
                                 minRadius=0, maxRadius=0)
                                     # change the last two parameters
                                     # (min_radius & max_radius) to detect larger circles
-        
+
             #To draw the detected circlesSE
             #= x, y, radius
             if circles is not None:
@@ -88,12 +88,28 @@ class ScatterPlot(object):
                     # circle outline
                     radius = i[2]
                     cv.circle(src, center, radius, (255, 0, 255), 3)
-        
+
             gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
             edges = cv.Canny(gray,50,150,apertureSize = 3)
-            
+
             lines = cv.HoughLines(edges,1,np.pi/180, 200)
             if lines is not None:
+
+                x_axis, y_axis = None, None
+                for i in range(0, len(lines)):
+                    rho = lines[i][0][0]
+                    theta = lines[i][0][1]
+                    if(x_axis is None and abs(theta) < np.pi/4 or abs(np.pi-theta) < np.pi/4):
+                        x_axis = lines[i]
+                    if(y_axis is None and theta > np.pi/4):
+                        y_axis = lines[i]
+                print(lines)
+                lines = [y_axis, x_axis]
+                print(x_axis, y_axis)
+                assert(x_axis is not None)
+                assert(y_axis is not None)
+
+                pts = []
                 for i in range(0, len(lines)):
                     rho = lines[i][0][0]
                     theta = lines[i][0][1]
@@ -103,9 +119,18 @@ class ScatterPlot(object):
                     y0 = b * rho
                     pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
                     pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+                    pts.append([pt1, pt2])
                     cv.line(src, pt1, pt2, (0,0,255), 3, cv.LINE_AA)
-            
-            cartCoord = []
+                x_1, y_1 = pts[0][0]
+                x_2,y_2 = pts[0][1]
+                x_3,y_3 = pts[1][0]
+                x_4,y_4 = pts[1][1]
+
+                x_intersection = ((x_1*y_2 - y_1*x_2)*(x_3-x_4)-(x_1-x_2)*(x_3*y_4-y_3*x_4))/((x_1-x_2)*(y_3-y_4)-(y_1-y_2)*(x_3-x_4))
+                y_intersection = ((x_1*y_2 - y_1*x_2)*(y_3-y_4)-(y_1-y_2)*(x_3*y_4-y_3*x_4))/((x_1-x_2)*(y_3-y_4)-(y_1-y_2)*(x_3-x_4))
+                origin = (x_intersection, y_intersection)
+                print(origin)
+            '''cartCoord = []
             for i in range(0, len(lines)):
                 theta = lines[i][0][1]
                 r = lines[i][0][0]
@@ -114,9 +139,10 @@ class ScatterPlot(object):
                 y = r * np.sin(theta)
                 y = round(y, 3)
                 cartCoord.append((x,y))
-            origin = (cartCoord[1][0], cartCoord[0][1])
-        
-        
+                print(cartCoord)
+            origin = (cartCoord[1][0], cartCoord[0][1])'''
+
+
             laTexCode = "\\begin{figure}"+"\n"+"\centering" + "\n" + "\\begin{tikzpicture}"+"\n"
             laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin) #add axes
             laTexCode += self.laTexPoints(laTexCode, circles, height, width, origin) #add points
@@ -127,9 +153,9 @@ class ScatterPlot(object):
                 fp.write(laTexCode)
             cv.imwrite('linesAndPoints.jpg',src)
             cv.waitKey(0)
-        
+
         return laTexCode
-    
+
 
 # Basic Animation Framework from 112 website
 ####################################
@@ -150,7 +176,7 @@ def init(data):
         data.picWidth = int(data.picHeight / data.ratio)
         data.image = data.image.resize((data.picHeight,data.picWidth))
         data.image = ImageTk.PhotoImage(data.image)
-    
+
 def mousePressed(event, data):
     # use event.x and event.y
     pass
@@ -161,16 +187,16 @@ def keyPressed(event, data):
 
 def redrawAll(canvas, data):
     # draw in canvas
-    canvas.create_text(data.width/2, 0, anchor = N, text = "Graphikz", fill = "black", font = 
+    canvas.create_text(data.width/2, 0, anchor = N, text = "Graphikz", fill = "black", font =
     "Arial 26")
     print('data.image', data.image)
-    canvas.create_text(data.width/2, data.height/12, anchor = N, text = "Please upload an image of your graph below (via Upload File)",fill = "black", font = 
+    canvas.create_text(data.width/2, data.height/12, anchor = N, text = "Please upload an image of your graph below (via Upload File)",fill = "black", font =
     "Arial 12")
-    canvas.create_text(data.width/2, data.height/8, anchor = N, text = "A picture of detected points(magenta) and axes(red) will appear:",fill = "black", font = 
+    canvas.create_text(data.width/2, data.height/8, anchor = N, text = "A picture of detected points(magenta) and axes(red) will appear:",fill = "black", font =
     "Arial 12")
     if(data.image != None):
         canvas.create_image(data.width/2, data.height/1.7, anchor=S, image=data.image)
-    canvas.create_text(data.width/2, data.height/1.6, anchor = N, text = "Please download your LaTeX File here!",fill = "black", font = 
+    canvas.create_text(data.width/2, data.height/1.6, anchor = N, text = "Please download your LaTeX File here!",fill = "black", font =
     "Arial 12")
 
 ####################################
@@ -183,7 +209,7 @@ def run(width, height):
         canvas.create_rectangle(0, 0, data.width, data.height,
                                 fill='white', width=0)
         redrawAll(canvas, data)
-        canvas.update()    
+        canvas.update()
 
     def mousePressedWrapper(event, canvas, data):
         mousePressed(event, data)
@@ -192,7 +218,7 @@ def run(width, height):
     def keyPressedWrapper(event, canvas, data):
         keyPressed(event, data)
         redrawAllWrapper(canvas, data)
-        
+
 
     # Set up data and call init
     class Struct(object): pass
@@ -212,45 +238,45 @@ def run(width, height):
     root.bind("<Key>", lambda event:
                             keyPressedWrapper(event, canvas, data))
     redrawAll(canvas, data)
-    
+
     #Browse Button Setup
     file_browser = Browse(data, canvas, root, initialdir=r"C:\Users",
-                                filetypes=(('Portable Network Graphics','*.png'),
+                                filetypes=(('Portable Network Graphics','*.png'), ("JPEG", "*.jpg"),
                                                             ("All files", "*.*")))
     file_browser.pack(fill='x', expand=True)
-    
+
     def downloadFile():
         exportFile = fd.asksaveasfile(mode='a') #gets filename, location user wants to save it in
         with open(exportFile.name, 'w') as fp: #write to a txt file, and then to tex file at the end
             fp.write(data.laTexCode)
-            
+
     tk.Button(root, text = "Download File", command = downloadFile).pack() # 'command' is executed when you click the button
-                                                                        # in this above case we're calling the function 'say_hi'.                                                       
+                                                                        # in this above case we're calling the function 'say_hi'.
     OPTIONS = [
     "Scatter Plot"
     ] #etc
-    
+
     variable = StringVar(root)
     variable.set("Pick a graph type...") # default value
-    
+
     w = OptionMenu(root, variable, *OPTIONS)
     print ("value is:" + variable.get())
     w.pack()
-    
+
     # on change dropdown value
     def change_dropdown(*args):
         print(variable.get())
         if(variable.get() == "Scatter Plot"):
             data.graph1 = ScatterPlot()
-    
+
     # link function to change dropdown
     variable.trace('w', change_dropdown)
 
-        
+
     root.mainloop()  # blocks until window is closed
     print("bye!")
 
-    
+
 class Browse(tk.Frame): # based from https://codereview.stackexchange.com/questions/184589/basic-file-browse
 #Plus my additions
     """ Creates a frame that contains a button when clicked lets the user to select
@@ -268,7 +294,7 @@ class Browse(tk.Frame): # based from https://codereview.stackexchange.com/questi
         self.canvas = canvas
         self.root = root
         self.filepath.trace('w', self.on_file_change) # detect filepath change, callbacks
-        
+
     def on_file_change(self, *args):
         print('file changed to {}'.format(self.filepath.get()))
         self.data.laTexCode = self.data.graph1.detectPointsAndAxes(sys.argv[1:],self.filepath.get())
@@ -288,7 +314,7 @@ class Browse(tk.Frame): # based from https://codereview.stackexchange.com/questi
             data.image = ImageTk.PhotoImage(data.image)
             redrawAll(self.canvas, self.data)
             self.canvas.update()
-        
+
 
     def _create_widgets(self):
         self._entry = tk.Entry(self, textvariable=self.filepath)
@@ -304,7 +330,7 @@ class Browse(tk.Frame): # based from https://codereview.stackexchange.com/questi
         self.file = fd.askopenfilename(initialdir=self._initaldir,
                                              filetypes=self._filetypes)
         self.filepath.set(self.file)
-        
+
     def getFilePath(self):
         return self.filepath.get()
 
