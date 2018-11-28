@@ -10,40 +10,55 @@ from tkinter import ttk
 import tkinter as ttk
 
 class ScatterPlot(object):
-    def laTexPoints(self,laTex, circles, height, width, origin):
+    def laTexPoints(self,laTex, circles, width, origin, xLength, yLength):
         pointLaTex = ""
         defaultColor = "black"
         size = 5
-        #scaling section
-        #actual LaTex
-        # \node[circle,fill=black,inner sep=0pt,minimum size=5pt] at (1,2) {};
-        xLen = width - origin[0]
-        yLen = origin[1]
-        for i in range(0, len(circles[0])):
-            oldX = circles[0][i][0] - origin[0]
-            oldY = circles[0][i][1]
-            r = circles[0][i][2] //2 #might need to scale this later, at the moment, just halve it
-            newX = (5*(oldX))/xLen
-        # print("newX",newX)
-            newY = 5 - (5*(oldY))/yLen
-            pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(r)+"pt] at ("+str(newX)+","+str(newY)+") {};" + "\n"
+        if(xLength > 0 and yLength > 0): #first quad
+            xLen = width - origin[0]
+            yLen = origin[1]
+            for i in range(0, len(circles[0])):
+                oldX = circles[0][i][0] - origin[0]
+                oldY = circles[0][i][1]
+                r = circles[0][i][2] //2 #might need to scale this later, at the moment, just halve it
+                newX = (xLength*(oldX))/xLen
+                newY = yLength - (yLength*(oldY))/yLen
+                pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(r)+"pt] at ("+str(newX)+","+str(newY)+") {};" + "\n"
+        elif(xLength < 0 and yLength > 0): #second quad
+            xLen = origin[0]
+            yLen = origin[1]
+            for i in range(0, len(circles[0])):
+                oldX = circles[0][i][0] - origin[0]
+                oldY = circles[0][i][1]
+                r = circles[0][i][2] //2 #might need to scale this later, at the moment, just halve it
+                newX = -(xLength*(oldX))/xLen
+                newY = yLength - (yLength*(oldY))/yLen
+                pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(r)+"pt] at ("+str(newX)+","+str(newY)+") {};" + "\n"
         return pointLaTex
 
 
     def laTexAxes(self,laTex, axes, height, width, origin): #need to expand beyond just quadrants
         #print(axes)
         axesLatex = ""
-        defaultLength = 5
+        defaultxLength = 5
+        defaultyLength = 5
         if(len(axes) == 2 and origin[0] < width/2 and origin[1] > height/2): #first quad
-            axesLatex += "\draw[->] (0,0) -- ("+str(defaultLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,"+str(defaultLength)+");" + "\n"
+            axesLatex += "\draw[->] (0,0) -- ("+str(defaultxLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,"+str(defaultyLength)+");" + "\n"
+            #if in the first quad, defaultxLength is positive and defaultyLength is positive
         elif(len(axes) == 2 and origin[0] > width/2 and origin[1] > height/2): #second quad
-            print("SECOND QUAD FAM")
-            axesLatex += "\draw[->] (0,0) -- (-"+str(defaultLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,"+str(defaultLength)+");" + "\n"
+            defaultxLength *= -1
+            axesLatex += "\draw[->] (0,0) -- ("+str(defaultxLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,"+str(defaultyLength)+");" + "\n"
+            #if in the second quad, defaultxLength is negative and defaultyLength is positive
         elif(len(axes) == 2 and origin[0] > width/2 and origin[1] < height/2): #third quad
-            axesLatex += "\draw[->] (0,0) -- (-"+str(defaultLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,-"+str(defaultLength)+");" + "\n"
+            defaultxLength *= -1
+            defaultyLength *= -1
+            axesLatex += "\draw[->] (0,0) -- ("+str(defaultxLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,"+str(defaultyLength)+");" + "\n"
+            #if in the third quad, defaultxLength is negative and defaultyLength is negative
         elif(len(axes) == 2 and origin[0] < width/2 and origin[1] < height/2): #fourth quad
-            axesLatex += "\draw[->] (0,0) -- ("+str(defaultLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,-"+str(defaultLength)+");" + "\n"
-        return axesLatex
+            defaultyLength *= -1
+            axesLatex += "\draw[->] (0,0) -- ("+str(defaultxLength)+",0);" + "\n" + "\draw[->] (0,0) -- (0,"+str(defaultyLength)+");" + "\n"
+            #if in the third quad, defaultxLength is positive and defaultyLength is negative
+        return [axesLatex, defaultxLength, defaultyLength]
 
 
     def detectPointsAndAxes(self,argv, picFile):
@@ -144,8 +159,12 @@ class ScatterPlot(object):
 
 
             laTexCode = "\\begin{figure}"+"\n"+"\centering" + "\n" + "\\begin{tikzpicture}"+"\n"
-            laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin) #add axes
-            laTexCode += self.laTexPoints(laTexCode, circles, height, width, origin) #add points
+            laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin)[0] #add axes
+            x_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[1]
+            y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
+            print("x-length",x_axis_length)
+            print("y-length", y_axis_length)
+            laTexCode += self.laTexPoints(laTexCode, circles, width, origin, x_axis_length, y_axis_length) #add points
             #when you're all done:
             laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
             #print(laTexCode)
