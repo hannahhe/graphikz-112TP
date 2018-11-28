@@ -2,6 +2,12 @@ import sys
 import cv2 as cv
 import numpy as np
 import math
+import tkinter as tk
+from tkinter import filedialog as fd
+from tkinter import *
+from PIL import ImageTk,Image 
+from tkinter import filedialog
+from tkinter import ttk 
 
 #class ScatterPlot(object):
     
@@ -44,7 +50,7 @@ def laTexAxes(laTex, axes, height, width, origin): #need to expand beyond just q
 def detectPointsAndAxes(argv):
     
     #what file/picture will it look at?
-    default_file =  "C:/Users/hanna/Documents/15-112 HW/TermProject/graphikz-112TP/HoughTest.png"
+    default_file = "C:/Users/hanna/Documents/15-112 HW/TermProject/graphikz-112TP/HoughTest.png"
     filename = argv[0] if len(argv) > 0 else default_file
     # Loads an image
     src = cv.imread(filename, cv.IMREAD_COLOR)
@@ -119,11 +125,121 @@ def detectPointsAndAxes(argv):
     #print(laTexCode) 
     with open('yourLatexFile.txt', 'w') as fp: #write to a txt file, and then to tex file at the end
         fp.write(laTexCode)
-    cv.imshow('linesAndPoints.jpg',src)
+    cv.imwrite('linesAndPoints.jpg',src)
     cv.waitKey(0)
     
     return 0
     
+
+
+# Basic Animation Framework from 112 website
+####################################
+# customize these functions
+####################################
+
+def init(data):
+    # load data.xyz as appropriate
+    data.image = Image.open("linesAndPoints.jpg")
+    data.ratio = data.image.width/data.image.height
+    data.picHeight = 300
+    data.picWidth = int(data.picHeight / data.ratio)
+    data.image = data.image.resize((data.picHeight,data.picWidth))
+    data.image = ImageTk.PhotoImage(data.image)
+    
+def mousePressed(event, data):
+    # use event.x and event.y
+    pass
+
+def keyPressed(event, data):
+    # use event.char and event.keysym
+    pass
+
+def redrawAll(canvas, data):
+    # draw in canvas
+    canvas.create_text(data.width/2, 0, anchor = N, text = "Graphikz", fill = "black", font = 
+    "Arial 26")
+    canvas.create_image(data.width/2, data.height, anchor=S, image=data.image)
+    
+
+####################################
+# use the run function as-is
+####################################
+
+def run(width, height):
+    def redrawAllWrapper(canvas, data):
+        canvas.delete(ALL)
+        canvas.create_rectangle(0, 0, data.width, data.height,
+                                fill='white', width=0)
+        redrawAll(canvas, data)
+        canvas.update()    
+
+    def mousePressedWrapper(event, canvas, data):
+        mousePressed(event, data)
+        redrawAllWrapper(canvas, data)
+
+    def keyPressedWrapper(event, canvas, data):
+        keyPressed(event, data)
+        redrawAllWrapper(canvas, data)
+
+    # Set up data and call init
+    class Struct(object): pass
+    data = Struct()
+    data.width = width
+    data.height = height
+    root = Tk()
+    root.resizable(width=False, height=False) # prevents resizing window
+    init(data)
+    # create the root and the canvas
+    canvas = Canvas(root, width=data.width, height=data.height)
+    canvas.configure(bd=0, highlightthickness=0)
+    canvas.pack()
+    # set up events
+    root.bind("<Button-1>", lambda event:
+                            mousePressedWrapper(event, canvas, data))
+    root.bind("<Key>", lambda event:
+                            keyPressedWrapper(event, canvas, data))
+    redrawAll(canvas, data)
+    # and launch the app
+    file_browser = Browse(root, initialdir=r"C:\Users",
+                                filetypes=(('Portable Network Graphics','*.png'),
+                                                            ("All files", "*.*")))
+    file_browser.pack(fill='x', expand=True)
+    filePath = file_browser.getFilePath()
+    print(filePath)
+    root.mainloop()  # blocks until window is closed
+    print("bye!")
+    
+class Browse(tk.Frame):
+    """ Creates a frame that contains a button when clicked lets the user to select
+    a file and put its filepath into an entry.
+    """
+
+    def __init__(self, master, initialdir='', filetypes=()):
+        super().__init__(master)
+        self.filepath = tk.StringVar()
+        self._initaldir = initialdir
+        self._filetypes = filetypes
+        self._create_widgets()
+        self._display_widgets()
+
+    def _create_widgets(self):
+        self._entry = tk.Entry(self, textvariable=self.filepath)
+        self._button = tk.Button(self, text="Upload File", command=self.browse)
+
+    def _display_widgets(self):
+        self._entry.pack(fill='x', expand=True)
+        self._button.pack(anchor='se')
+
+    def browse(self):
+        """ Browses a .png file or all files and then puts it on the entry.
+        """
+
+        self.filepath.set(fd.askopenfilename(initialdir=self._initaldir,
+                                             filetypes=self._filetypes))
+    def getFilePath(self):
+        return self._entry
+
+
 if __name__ == "__main__":
     detectPointsAndAxes(sys.argv[1:])
-    
+    run(600, 600)
