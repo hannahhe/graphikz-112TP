@@ -45,6 +45,17 @@ class ScatterPlot(object):
                 newX = -(xLength*(oldX))/xLen
                 newY = (yLength*(oldY))/yLen
                 pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(r)+"pt] at ("+str(newX)+","+str(newY)+") {};" + "\n"
+        elif(xLength > 0 and yLength < 0): #fourth quad
+            xLen = width - origin[0]
+            yLen = height - origin[1]
+            print(yLen)
+            for i in range(0, len(circles[0])):
+                oldX = circles[0][i][0] - origin[0]
+                oldY = circles[0][i][1]
+                r = circles[0][i][2] //2 #might need to scale this later, at the moment, just halve it
+                newX = (xLength*(oldX))/xLen
+                newY = (yLength*(oldY))/yLen
+                pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(r)+"pt] at ("+str(newX)+","+str(newY)+") {};" + "\n"
         return pointLaTex
 
 
