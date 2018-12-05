@@ -24,8 +24,8 @@ const clipboardRef = elem => {
   if (elem) { new Clipboard(elem) }
 };
 
-const Blurb = () => ( //make welcome blurb
-  <p>Welcome! Blah blah</p>
+const Welcome = () => ( //make welcome blurb
+  <p>Welcome! You know how much of a pain it is to take your beautiful graphs and throw them in LaTeX? Even worse, Tikz in LaTeX?! </p>
 );
 
 class Instructions extends React.Component {
@@ -103,7 +103,7 @@ $(document).ready(() => {
   ReactDOM.render(
     <div>
       <h1>Graphikz</h1>
-      <Blurb />
+      <Welcome />
       <Instructions />
       <UserInput />
 

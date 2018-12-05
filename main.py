@@ -9,6 +9,161 @@ from PIL import ImageTk,Image
 from tkinter import ttk
 import tkinter as ttk
 
+class GraphTheory(object):
+    def detectPointsAndAxes(self, picFile): #This code is modified from: https://docs.opencv.org/3.4/d4/d70/tutorial_hough_circle.html
+        #what file/picture will it look at?
+        if(picFile != ""):
+            default_file = picFile
+            print(default_file)
+            filename = default_file
+        # Loads an image
+            src = cv.imread(filename, cv.IMREAD_COLOR) #picFile
+
+            height,width, channels = src.shape #get the height and width of the picture
+
+        # Check if image is loaded fine
+            if src is None:
+                print ('Error opening image!')
+                print ('Usage: hough_circle.py [image_name -- default ' + default_file + '] \n')
+                return -1
+
+
+            gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY) #change the color scale to grayscale
+
+
+            gray = cv.medianBlur(gray, 5) #reduce noise and false positives
+
+
+            rows = gray.shape[0]
+            #actual function to detect circles = HoughCircles
+            circles = cv.HoughCircles(gray, cv.HOUGH_GRADIENT, 1, rows / 12, #change this value to detect circles with different distances to each other
+                                param1=100, param2=20,
+                                minRadius=0, maxRadius=0)
+                                    # change the last two parameters
+                                    # (min_radius & max_radius) to detect larger circles
+
+            #To draw the detected circles
+            #circles = array of [x, y, radius] per each circle detected
+            if circles is not None:
+                circles = np.uint16(np.around(circles))
+                for i in circles[0, :]:
+                    center = (i[0], i[1])
+                    # circle center
+                    cv.circle(src, center, 1, (0, 100, 100), 3)
+                    # circle outline
+                    radius = i[2]
+                    cv.circle(src, center, radius, (255, 0, 255), 3)
+
+            gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
+            edges = cv.Canny(gray,50,150,apertureSize = 3) #edge detection
+
+            kernel_size = 5
+            blur_gray = cv.GaussianBlur(gray,(kernel_size, kernel_size),0)
+
+            low_threshold = 50
+            high_threshold = 150
+            edges = cv.Canny(blur_gray, low_threshold, high_threshold)
+
+            rho = 1  # distance resolution in pixels of the Hough grid
+            theta = np.pi / 180  # angular resolution in radians of the Hough grid
+            threshold = 15  # minimum number of votes (intersections in Hough grid cell)
+            min_line_length = 100  # minimum number of pixels making up a line
+            max_line_gap = 20  # maximum gap in pixels between connectable line segments
+            line_image = np.copy(src) * 0  # creating a blank to draw lines on
+
+            # Run Hough on edge detected image
+            # Output "lines" is an array containing endpoints of detected line segments
+            lines = cv.HoughLines(edges,1,np.pi/180,124) #120-125
+            #lines = cv.HoughLines(edges, rho, theta, threshold)#, np.array([]),
+                                #min_line_length, max_line_gap)
+            lines = np.ndarray.tolist(lines)
+            numOfCircles = len(circles)
+            mappings = dict()
+            thetaMappings = dict()
+            theta = []
+            for i in range(len(lines)):
+                if(lines[i][0][1] not in mappings):
+                    mappings[lines[i][0][1]] = lines[i][0][0]
+            for key in mappings:
+                theta.append(key)
+            theta = sorted(theta)
+            filteredTheta = [theta[0]]
+            sum = filteredTheta[0] + 0.05
+            diff = filteredTheta[0] - 0.05
+            print("theta", theta)
+            for i in range(len(theta)):
+                if(theta[i] < sum and theta[i] > diff):
+                    pass
+                else:
+                    filteredTheta.append(theta[i])
+                    sum = filteredTheta[-1] + 0.05
+                    diff = filteredTheta[-1] - 0.05
+            print("filter", filteredTheta)
+            filteredLines = []
+
+            for i in range(len(filteredTheta)):
+                filteredLines.append([mappings[filteredTheta[i]],filteredTheta[i]])
+            print(filteredLines)
+
+
+            '''rho = []
+            for i in range(len(lines)):
+                if(lines[i][0][0] not in mappings):
+                    mappings[lines[i][0][0]] = lines[i][0][1]
+            for key in mappings:
+                rho.append(key)
+            rho = sorted(rho)
+            #print(rho)
+            filteredRho = [rho[0]]
+            sum = filteredRho[0] + 7
+            diff = filteredRho[0] - 7
+            print("rho", rho)
+            for i in range(len(rho)):
+                if(rho[i] < sum and rho[i] > diff):
+                    pass
+                else:
+                    filteredRho.append(rho[i])
+                    sum = filteredRho[-1] + 7
+                    diff = filteredRho[-1] - 7
+            print("filter", filteredRho)
+            filteredLines = []
+
+            for i in range(len(filteredRho)):
+                filteredLines.append([filteredRho[i], mappings[filteredRho[i]]])
+            print(filteredLines)'''
+
+            for i in range(0,len(filteredLines)):
+                rho = filteredLines[i][0]
+                theta = filteredLines[i][1]
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a*rho
+                y0 = b*rho
+                x1 = int(x0 + 1000*(-b)) #1000 is the length of the line drawn
+                y1 = int(y0 + 1000*(a))
+                x2 = int(x0 - 1000*(-b))
+                y2 = int(y0 - 1000*(a))
+
+                cv.line(src,(x1,y1),(x2,y2),(0,0,255),2)
+
+
+            #Start building the LaTeX code:
+            laTexCode = "\\begin{figure}"+"\n"+"\centering" + "\n" + "\\begin{tikzpicture}"+"\n"
+            #laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin)[0] #add axes
+            #x_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[1] #get the length of axes: important for scaling points
+            #y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
+            #laTexCode += self.laTexPoints(laTexCode, circles, width, height, origin, x_axis_length, y_axis_length) #add points
+            #when you're all done:
+            laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
+            #Write the code to a .tex file so the user can download it
+            with open('yourLatexFile.tex', 'w') as fp:
+                fp.write(laTexCode)
+            cv.imwrite('linesAndPoints.jpg', src)
+            cv.waitKey(0)
+
+        return laTexCode
+
+
 class ScatterPlot(object):
     #take the detected points and scale them, as well as creating LaTeX code to plot said points
     def laTexPoints(self,laTex, circles, width, height, origin, xLength, yLength):
@@ -91,7 +246,7 @@ class ScatterPlot(object):
             print(default_file)
             filename = default_file
         # Loads an image
-            src = picFile#cv.imread(filename, cv.IMREAD_COLOR)
+            src = cv.imread(filename, cv.IMREAD_COLOR) #picFile
 
             height,width, channels = src.shape #get the height and width of the picture
 
@@ -173,10 +328,10 @@ class ScatterPlot(object):
 
             #Start building the LaTeX code:
             laTexCode = "\\begin{figure}"+"\n"+"\centering" + "\n" + "\\begin{tikzpicture}"+"\n"
-            laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin)[0] #add axes
-            x_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[1] #get the length of axes: important for scaling points
-            y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
-            laTexCode += self.laTexPoints(laTexCode, circles, width, height, origin, x_axis_length, y_axis_length) #add points
+            #laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin)[0] #add axes
+            #x_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[1] #get the length of axes: important for scaling points
+            #y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
+            #laTexCode += self.laTexPoints(laTexCode, circles, width, height, origin, x_axis_length, y_axis_length) #add points
             #when you're all done:
             laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
             #Write the code to a .tex file so the user can download it
@@ -277,7 +432,7 @@ def run(width, height):
     #Choose Graph Type button set up, dropdown set up
     #Based and modified from: https://pythonspot.com/tk-dropdown-example/ and https://stackoverflow.com/questions/45441885/python-tkinter-creating-a-dropdown-select-bar-from-a-list/45442534
     OPTIONS = [
-    "Scatter Plot"
+    "Scatter Plot", "Graph Theory"
     ] #will add more options as I add more supported graphs
 
     variable = StringVar(root)
@@ -292,6 +447,8 @@ def run(width, height):
         print(variable.get())
         if(variable.get() == "Scatter Plot"):
             data.graph1 = ScatterPlot() #create a Scatter Plot Object when selected from dropdown
+        elif(variable.get() == "Graph Theory"):
+            data.graph1 = GraphTheory()
 
     # link function to change dropdown
     variable.trace('w', change_dropdown)
@@ -328,7 +485,7 @@ class Browse(tk.Frame): # based from https://codereview.stackexchange.com/questi
 
     def on_file_change(self, *args):
         print('file changed to {}'.format(self.filepath.get())) #if the file has changed (user has uploaded a different file)
-        self.data.laTexCode = self.data.graph1.detectPointsAndAxes(sys.argv[1:],self.filepath.get()) #Call the main function
+        self.data.laTexCode = self.data.graph1.detectPointsAndAxes(self.filepath.get()) #Call the main function
         # load data.xyz as appropriate
         data = self.data
         try: #check if there is a file of detected lines and points
