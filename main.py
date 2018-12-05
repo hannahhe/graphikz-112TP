@@ -105,7 +105,7 @@ class GraphTheory(object):
                 filteredLines.append([mappings[filteredTheta[i]],filteredTheta[i]])
             print(filteredLines)
 
-
+            #you can also filter by rho
             '''rho = []
             for i in range(len(lines)):
                 if(lines[i][0][0] not in mappings):
