@@ -51,16 +51,17 @@ class GraphTheory(object):
             i[1] = 5 - i[1]
             i[2] = defaultSize
             pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(i[2])+"pt] at ("+str(i[0])+","+str(i[1])+") {};" + "\n"
-        return [pointLaTex, scaledPoints]
+        centroid = [xAverage, yAverage]
+        return [pointLaTex, scaledPoints, scalingFactor, centroid]
 
-    def laTeXEdges(self, noCircles, lines, circles):
+    def laTeXEdges(self, noCircles, lines, circles, scalingFactor, centroid):
+        edgesCode = ""
         circles = circles[0].tolist()
         actualLines = []
         sumArray = []
         img = cv.imread(noCircles)
         tempPlot = cv.imread(noCircles, cv.IMREAD_COLOR)
         taiPlot = cv.imread(noCircles, cv.IMREAD_COLOR)
-        cutoff = 73000
         circlePoints = []
         for i in range(len(circles)):
             for j in range(i+1,len(circles)):
@@ -93,16 +94,41 @@ class GraphTheory(object):
             print(sum)
             sumArray.append((sum, [x1, y1, x2, y2]))
         sumArray.sort()
+        xCoord = []
+        xAverage = 0
+        xMax = 0
+        xMin = 0
+        xDist = 0
+        yCoord = []
+        yAverage = 0
+        yMax = 0
+        yMin = 0
         # iterate through sum array
         for i in range (8):
-            #actualLines.append([x1,y1,x2,y2]) #add the line end points
             x1, y1, x2, y2 = sumArray[i][1]
+            actualLines.append([x1,y1,x2,y2]) #add the line end points
             cv.line(taiPlot,(x1,y1),(x2,y2),(0,0,255),2)
-
-        print(actualLines)
+        #whiten and scale
+        for j in range(len(actualLines)):
+            actualLines[j][0] -= centroid[0]
+            actualLines[j][1] -= centroid[1]
+            actualLines[j][2] -= centroid[0]
+            actualLines[j][3] -= centroid[1]
+            actualLines[j][0] /= scalingFactor
+            actualLines[j][1] /= scalingFactor
+            actualLines[j][2] /= scalingFactor
+            actualLines[j][3] /= scalingFactor
+            actualLines[j][0] *= 5
+            actualLines[j][1] *= 5
+            actualLines[j][2] *= 5
+            actualLines[j][3] *= 5
+            actualLines[j][1] = 5 - actualLines[j][1]
+            actualLines[j][3] = 5 - actualLines[j][3]
+            x1, y1, x2, y2 = actualLines[j]
+            edgesCode += "\\draw[-]({},{})--({},{});\n".format(x1,y1,x2,y2)
         cv.imwrite('taiPlot.jpg', taiPlot)
         cv.imwrite('tempPlot.jpg', tempPlot)
-        return 'hi'
+        return edgesCode
 
 
     def detectPointsAndAxes(self, picFile): #This code is modified from: https://docs.opencv.org/3.4/d4/d70/tutorial_hough_circle.html
@@ -252,7 +278,9 @@ class GraphTheory(object):
             #y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
             laTexCode += self.laTeXnodes(circles)[0] #add points
             scaledPoints = self.laTeXnodes(circles)[1]
-            laTexCode += self.laTeXEdges('noCircles.jpg', lines, circles)
+            scalingFactor = self.laTeXnodes(circles)[2]
+            centroid = self.laTeXnodes(circles)[3]
+            laTexCode += self.laTeXEdges('noCircles.jpg', lines, circles, scalingFactor, centroid)
             #when you're all done:
             laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
             #Write the code to a .tex file so the user can download it
