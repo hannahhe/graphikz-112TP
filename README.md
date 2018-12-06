@@ -12,3 +12,4 @@ How to run: 1. clone this repository into wherever you like.
             4. On your web browser, navigate to "http://localhost:####/" and press "ctrl+shift+'r'" to reload the page.
 
 There are instructions on the website for how to use Graphikz! It is suggested that you create your graph drawing in Google Drawings or hand-draw your graphs and take a picture to upload.
+!!! If when you press "copy LaTeX" and you don't get any code, it means something went wrong during the conversion. Double check your drawing and graph type. !!!

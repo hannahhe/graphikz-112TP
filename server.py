@@ -19,6 +19,7 @@ def graph(): #files are different from other things: if you wanted to send the f
         graph1 = ScatterPlot()
     if(request.form["GraphType"] == "Graph Theory"):
         graph1 = GraphTheory()
+        numEdges = int(request.form["NumEdges"])
         # Here is the code to convert the post request to an OpenCV object via https://gist.github.com/mjul/32d697b734e7e9171cdb
         if request.method == 'PUT' and 'GraphImage' in request.files:
             photo = request.files['GraphImage']
@@ -27,7 +28,10 @@ def graph(): #files are different from other things: if you wanted to send the f
             data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
             color_image_flag = 1
             img = cv2.imdecode(data, color_image_flag)
-        laTexCode = graph1.detectPointsAndAxes(img)
+        if(isinstance(graph1, GraphTheory)):
+            laTexCode = graph1.detectPointsAndAxes(img, numEdges)
+        if(isinstance(graph1, ScatterPlot)):
+            laTexCode = graph1.detectPointsAndAxes(img)
 
 
     return jsonify({'latex': laTexCode}) #jsonify: turns python dictionaries into json

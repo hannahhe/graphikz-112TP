@@ -35,24 +35,37 @@ class UserInput extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
+    this.state.formData = new FormData();
   }
 
   onChange = (e, val) => { //defines a function, onChange which takes an event and value and takes value and stores it in something
     this.state.graph_mode = val; //storing
   }
 
+
   getUploadedFileName = (e) => {  //get the file
     let files = e.target.files,
         value = e.target.value;
-    var formData = new FormData();
 
-    formData.append('GraphImage', files[0]);
-    formData.append('GraphType', this.state.graph_mode);
+    this.state.formData.append('GraphImage', files[0]);
+    this.state.formData.append('GraphType', this.state.graph_mode);
+  }
+
+  getNumberOfEdges = (e) => {  //get the number of edges
+    let edges = e.target.value;
+    this.state.num_edges = edges;
 
 
+    this.state.formData.append('NumEdges', this.state.num_edges);
+    this.state.formData.append('GraphType', this.state.graph_mode);
+
+    console.log(this.state.formData);
+  }
+
+  sendGraphInfo = () => {
     fetch('/graph', { //http put request
       method: 'PUT',
-      body: formData
+      body: this.state.formData
     })
     .then(response => response.json()) //get back a json
     .catch(error => console.error(error)) //error handling
@@ -79,15 +92,22 @@ class UserInput extends React.Component {
           </Input>
         </Row>
         <Row>
+        <ul>
+        <li> If your GraphType you selected is Graph Theory, how many edges are in your graph? </li>
+        </ul>
+        <Input type="number" label="Number of Edges" s={12} onChange = {this.getNumberOfEdges} />
+        </Row>
+        <Row>
          <ul>
           <li>Please upload your graph file:</li>
          </ul>
           <Input type="file" label="Upload File" s={12}
           onChange={this.getUploadedFileName} />
+          <Button waves='light' onClick = {this.sendGraphInfo}>Submit</Button>
         </Row>
         <Row>
         <ul>
-         <li>It's ready! Please copy your LaTeX Code and paste it into your project!:</li>
+         <li>It's ready! Please copy your LaTeX Code and paste it into your project!</li>
         </ul>
           <Button><i className="fa fa-clipboard" aria-hidden="true" /> <a className = 'white-text' ref={ clipboardRef } data-clipboard-text={this.state.laTeX}>Copy LaTeX</a></Button>
         </Row>

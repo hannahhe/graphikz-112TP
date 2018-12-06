@@ -54,7 +54,7 @@ class GraphTheory(object):
         centroid = [xAverage, yAverage]
         return [pointLaTex, scaledPoints, scalingFactor, centroid]
 
-    def laTeXEdges(self, noCircles, lines, circles, scalingFactor, centroid):
+    def laTeXEdges(self, noCircles, lines, circles, scalingFactor, centroid, numEdges):
         edgesCode = ""
         circles = circles[0].tolist()
         actualLines = []
@@ -103,7 +103,7 @@ class GraphTheory(object):
         yMax = 0
         yMin = 0
         # iterate through sum array
-        for i in range (8):
+        for i in range (numEdges):
             x1, y1, x2, y2 = sumArray[i][1]
             actualLines.append([x1,y1,x2,y2]) #add the line end points
             cv.line(taiPlot,(x1,y1),(x2,y2),(0,0,255),2)
@@ -130,7 +130,7 @@ class GraphTheory(object):
         return edgesCode
 
 
-    def detectPointsAndAxes(self, picFile): #This code is modified from: https://docs.opencv.org/3.4/d4/d70/tutorial_hough_circle.html
+    def detectPointsAndAxes(self, picFile, numEdges): #This code is modified from: https://docs.opencv.org/3.4/d4/d70/tutorial_hough_circle.html
         #what file/picture will it look at?
         if(picFile != ""):
             default_file = picFile
@@ -279,7 +279,7 @@ class GraphTheory(object):
             scaledPoints = self.laTeXnodes(circles)[1]
             scalingFactor = self.laTeXnodes(circles)[2]
             centroid = self.laTeXnodes(circles)[3]
-            laTexCode += self.laTeXEdges('noCircles.jpg', lines, circles, scalingFactor, centroid)
+            laTexCode += self.laTeXEdges('noCircles.jpg', lines, circles, scalingFactor, centroid, numEdges)
             #when you're all done:
             laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
             #Write the code to a .tex file so the user can download it
@@ -319,7 +319,6 @@ class ScatterPlot(object):
         elif(xLength < 0 and yLength < 0): #third quad
             xLen = origin[0]
             yLen = height - origin[1]
-            print(yLen)
             for i in range(0, len(circles[0])):
                 oldX = circles[0][i][0] - origin[0]
                 oldY = circles[0][i][1]
@@ -330,7 +329,6 @@ class ScatterPlot(object):
         elif(xLength > 0 and yLength < 0): #fourth quad
             xLen = width - origin[0]
             yLen = height - origin[1]
-            print(yLen)
             for i in range(0, len(circles[0])):
                 oldX = circles[0][i][0] - origin[0]
                 oldY = circles[0][i][1]
