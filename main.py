@@ -91,7 +91,6 @@ class GraphTheory(object):
                         sum += img[int(d[1]),int(d[0])][0] #r
                         sum += img[int(d[1]),int(d[0])][1] #g
                         sum += img[int(d[1]),int(d[0])][2] #b
-            print(sum)
             sumArray.append((sum, [x1, y1, x2, y2]))
         sumArray.sort()
         xCoord = []

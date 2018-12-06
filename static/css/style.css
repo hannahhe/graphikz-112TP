@@ -1,0 +1,9 @@
+.title {
+  text-align: center;
+  font-family: 'Comfortaa', cursive;
+}
+body{
+  font-family: 'Muli', sans-serif;
+}
+.container {
+  max-width: 800px; }

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from main import ScatterPlot
+from main import ScatterPlot, GraphTheory
 import io
 import numpy as np
 import cv2
@@ -17,7 +17,9 @@ def graph(): #files are different from other things: if you wanted to send the f
     print(request.files)
     if(request.form["GraphType"] == "Scatter Plot"):
         graph1 = ScatterPlot()
-
+    if(request.form["GraphType"] == "Graph Theory"):
+        graph1 = GraphTheory()
+        
         # Here is the code to convert the post request to an OpenCV object via https://gist.github.com/mjul/32d697b734e7e9171cdb
         if request.method == 'PUT' and 'GraphImage' in request.files:
             photo = request.files['GraphImage']

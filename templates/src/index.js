@@ -25,19 +25,8 @@ const clipboardRef = elem => {
 };
 
 const Welcome = () => ( //make welcome blurb
-  <p>Welcome! You know how much of a pain it is to take your beautiful graphs and throw them in LaTeX? Even worse, Tikz in LaTeX?! </p>
+  <p>Welcome!</p>
 );
-
-class Instructions extends React.Component {
-  render() {
-    return (
-      <ul>
-        <li>Please select the type of graph you would like to tikzify: </li>
-        <li>Please ... </li>
-      </ul>
-    );
-  }
-}
 
 
 class UserInput extends React.Component {
@@ -78,19 +67,28 @@ class UserInput extends React.Component {
     return (
       <div>
         <Row>
+         <ul>
+          <li>Please select the type of graph you would like to tikzify:</li>
+         </ul>
           <Input s={12} type='select' label="Pick your graph type..." defaultValue='1'
             onChange={ this.onChange }>
             <option value='1'>Select...</option>
             <option value='Scatter Plot'>Scatter Plot</option>
-            <option value='3'>Option 3</option>
+            <option value='Graph Theory'>Graph Theory</option>
           </Input>
         </Row>
         <Row>
+         <ul>
+          <li>Please upload your graph file:</li>
+         </ul>
           <Input type="file" label="Upload File" s={12}
           onChange={this.getUploadedFileName} />
         </Row>
         <Row>
-          <Button><i className="fa fa-clipboard" aria-hidden="true" /> <a ref={ clipboardRef } data-clipboard-text={this.state.laTeX}>Copy LaTeX</a></Button>
+        <ul>
+         <li>It's ready! Please copy your LaTeX Code and paste it into your project!:</li>
+        </ul>
+          <Button><i className="fa fa-clipboard" aria-hidden="true" /> <a className = 'white-text' ref={ clipboardRef } data-clipboard-text={this.state.laTeX}>Copy LaTeX</a></Button>
         </Row>
       </div>
     );
@@ -102,9 +100,8 @@ class UserInput extends React.Component {
 $(document).ready(() => {
   ReactDOM.render(
     <div>
-      <h1>Graphikz</h1>
+      <h1 className='title'>\Graphikz[]</h1>
       <Welcome />
-      <Instructions />
       <UserInput />
 
     </div>,
