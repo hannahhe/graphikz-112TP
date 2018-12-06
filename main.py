@@ -137,8 +137,8 @@ class GraphTheory(object):
             print(default_file)
             filename = default_file
         # Loads an image
-            src = cv.imread(filename, cv.IMREAD_COLOR) #picFile
-            noCircles =  cv.imread(filename, cv.IMREAD_COLOR)
+            src = picFile#cv.imread(filename, cv.IMREAD_COLOR) #picFile
+            noCircles =  picFile
 
             height,width, channels = src.shape #get the height and width of the picture
 
@@ -372,7 +372,7 @@ class ScatterPlot(object):
             print(default_file)
             filename = default_file
         # Loads an image
-            src = cv.imread(filename, cv.IMREAD_COLOR) #picFile
+            src = picFile#cv.imread(filename, cv.IMREAD_COLOR) #picFile
 
             height,width, channels = src.shape #get the height and width of the picture
 

@@ -5,5 +5,8 @@
 body{
   font-family: 'Muli', sans-serif;
 }
+.footer{
+  text-align: center;
+}
 .container {
   max-width: 800px; }

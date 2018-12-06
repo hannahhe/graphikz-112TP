@@ -29,6 +29,7 @@ const Welcome = () => ( //make welcome blurb
 );
 
 
+
 class UserInput extends React.Component {
   //define constructor here
   constructor(props) {
@@ -100,10 +101,10 @@ class UserInput extends React.Component {
 $(document).ready(() => {
   ReactDOM.render(
     <div>
-      <h1 className='title'>\Graphikz[]</h1>
+      <h1 className='title'>\Graphikz[ ]</h1>
       <Welcome />
       <UserInput />
-
+      <footer className = 'footer'> By Hannah He </footer>
     </div>,
       //<Hannah number={1} />
       //<Hannah number={2} />
