@@ -11,17 +11,16 @@ from tkinter import ttk
 import tkinter as ttk
 
 class Function(object):
-    def plotFunction(self, func):
-        laTeXCode =  '''
-\\tikzset{>=stealth}
-\\begin{tikzpicture}
-\\begin{axis}[
-xmin=-10,xmax=10,
-ymin=-10,ymax=10,
-axis lines=center,
-axis line style=<->]
-\\addplot[<->] expression[domain=-10:10,samples=100]{'''
-        laTeXCode += func+ '};'  + '\n' + '\\end{axis}' + '\n'+ '\\end{tikzpicture}'
+    def plotFunction(self, func, D1, D2, X1, X2, Y1, Y2):
+        laTeXCode =  '\\tikzset{>=stealth}\n'
+        laTeXCode +=                 '\\begin{tikzpicture}\n'
+        laTeXCode +=                 '\\begin{axis}[\n'
+        laTeXCode +=                 'xmin={},xmax={},\n'.format(X1, X2)
+        laTeXCode +=                 'ymin={},ymax={},\n'.format(Y1,Y2)
+        laTeXCode +=                 'axis lines=center,\n'
+        laTeXCode +=                 'axis line style=<->]\n'
+        laTeXCode +=                 '\\addplot[<->] expression[domain={}:{},samples=100]'.format(D1, D2)
+        laTeXCode +=  '{' + func+ '};'  + '\n' + '\\end{axis}' + '\n'+ '\\end{tikzpicture}'
         return laTeXCode
 
 

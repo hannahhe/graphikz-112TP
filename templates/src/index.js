@@ -40,7 +40,23 @@ class UserInput extends React.Component {
 
   onChange = (e, val) => { //defines a function, onChange which takes an event and value and takes value and stores it in something
     this.state.graph_mode = val; //storing
+    if (val == 'Function') {
+      this.state.formData.set('D1', -10);
+      this.state.formData.set('D2', 10);
+      this.state.formData.set('X1', -10);
+      this.state.formData.set('X2', 10);
+      this.state.formData.set('Y1', -10);
+      this.state.formData.set('Y2', 10);
+    }
     this.forceUpdate();
+  }
+
+  onChangeField = field => {
+      let onChangeSpecific = (e) => {
+        let value = e.target.value;
+        this.state.formData.set(field, value);
+      }
+      return onChangeSpecific
   }
 
 
@@ -133,6 +149,23 @@ class UserInput extends React.Component {
             <Row>
             <Col s={1}>f(x)=</Col>
             <Col s={11}><Input placeholder="x^2 + abs(x)" s={6} onChange ={this.getFunction}/></Col>
+            </Row>
+            <Row>
+            <Col s={1}>Domain</Col>
+            <Col s={5}><Input placeholder="-10" defaultValue='-10' s={6} onChange ={this.onChangeField('D1')}/></Col>
+            <Col s={1}>to</Col>
+            <Col s={5}><Input placeholder="10" defaultValue='10' s={6} onChange ={this.onChangeField('D2')}/></Col>
+
+            <Col s={1}>Y-Axis Range</Col>
+            <Col s={5}><Input placeholder="-10" defaultValue='-10' s={6} onChange ={this.onChangeField('Y1')}/></Col>
+            <Col s={1}>to</Col>
+            <Col s={5}><Input placeholder="10" defaultValue='10' s={6} onChange ={this.onChangeField('Y2')}/></Col>
+
+            <Col s={1}>X-Axis Range</Col>
+            <Col s={5}><Input placeholder="-10" defaultValue='-10' s={6} onChange ={this.onChangeField('X1')}/></Col>
+            <Col s={1}>to</Col>
+            <Col s={5}><Input placeholder="10" defaultValue='10' s={6} onChange ={this.onChangeField('X2')}/></Col>
+
             </Row>
               <Button waves='light' onClick = {this.sendGraphInfo}>Submit</Button>
             </Row>

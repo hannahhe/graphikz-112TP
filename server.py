@@ -36,7 +36,13 @@ def graph(): #files are different from other things: if you wanted to send the f
         if(isinstance(graph1, ScatterPlot)):
             laTexCode = graph1.detectPointsAndAxes(img)
         if(isinstance(graph1, Function)):
-            laTexCode = graph1.plotFunction(func)
+            D1 =  request.form["D1"]
+            D2 =  request.form["D2"]
+            X1 =  request.form["X1"]
+            X2 =  request.form["X2"]
+            Y1 =  request.form["Y1"]
+            Y2 =  request.form["Y2"]
+            laTexCode = graph1.plotFunction(func, D1, D2, X1, X2, Y1, Y2)
 
 
     return jsonify({'latex': laTexCode}) #jsonify: turns python dictionaries into json
