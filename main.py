@@ -56,16 +56,17 @@ class GraphTheory(object):
     def laTeXEdges(self, noCircles, lines, circles):
         circles = circles[0].tolist()
         actualLines = []
+        sumArray = []
         img = cv.imread(noCircles)
         tempPlot = cv.imread(noCircles, cv.IMREAD_COLOR)
-        sum = 0
-        cutoff = 0
+        taiPlot = cv.imread(noCircles, cv.IMREAD_COLOR)
+        cutoff = 73000
         circlePoints = []
         for i in range(len(circles)):
             for j in range(i+1,len(circles)):
                 circlePoints.append([circles[i], circles[j]])
-        print(circlePoints)
         for pair in circlePoints:
+            sum = 0
             pt1 = pair[0]
             pt2 = pair[1]
             x1 = pt1[0] #let p be x1,y1 and q be x2,y2
@@ -74,21 +75,33 @@ class GraphTheory(object):
             y2 = pt2[1]
             p = [x1,y1]
             q = [x2,y2]
-            for i in range(100):
-                t= i * 0.01
-                d = [pi+t*(qi-pi) for (qi,pi) in zip(q,p)] #q-p
-                d[0] = int(d[0])
-                d[1] = int(d[1])
-                d = tuple(d)
-                cv.circle(tempPlot, d, 10, (255, 0, 255), 3)
-                sum += img[int(d[1]),int(d[0])][0] #r
-                sum += img[int(d[1]),int(d[0])][1] #g
-                sum += img[int(d[1]),int(d[0])][2] #b
-        print(sum)
+            offset = 10
+            for k in range(-offset, offset):
+                for l in range(-offset, offset):
+                    for i in range(100):
+                        t= i * 0.01
+                        pPrime = [x1+k,y1+l]
+                        qPrime = [x2+k,y2+l]
+                        d = [pi+t*(qi-pi) for (qi,pi) in zip(qPrime,pPrime)] #q-p
+                        d[0] = int(d[0])
+                        d[1] = int(d[1])
+                        d = tuple(d)
+                        #cv.circle(tempPlot, d, 10, (255, 0, 255), 3)
+                        sum += img[int(d[1]),int(d[0])][0] #r
+                        sum += img[int(d[1]),int(d[0])][1] #g
+                        sum += img[int(d[1]),int(d[0])][2] #b
+            print(sum)
+            sumArray.append((sum, [x1, y1, x2, y2]))
+        sumArray.sort()
+        # iterate through sum array
+        for i in range (8):
+            #actualLines.append([x1,y1,x2,y2]) #add the line end points
+            x1, y1, x2, y2 = sumArray[i][1]
+            cv.line(taiPlot,(x1,y1),(x2,y2),(0,0,255),2)
+
+        print(actualLines)
+        cv.imwrite('taiPlot.jpg', taiPlot)
         cv.imwrite('tempPlot.jpg', tempPlot)
-            #if(sum < cutoff): # you have a line!
-            #    actualLines.append([x1,y1,x2,y2]) #add the line end points
-            #print(actualLines)
         return 'hi'
 
 
