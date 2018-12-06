@@ -47,8 +47,8 @@ class UserInput extends React.Component {
     let files = e.target.files,
         value = e.target.value;
 
-    this.state.formData.append('GraphImage', files[0]);
-    this.state.formData.append('GraphType', this.state.graph_mode);
+    this.state.formData.set('GraphImage', files[0]);
+    this.state.formData.set('GraphType', this.state.graph_mode);
   }
 
   getNumberOfEdges = (e) => {  //get the number of edges
@@ -56,8 +56,8 @@ class UserInput extends React.Component {
     this.state.num_edges = edges;
 
 
-    this.state.formData.append('NumEdges', this.state.num_edges);
-    this.state.formData.append('GraphType', this.state.graph_mode);
+    this.state.formData.set('NumEdges', this.state.num_edges);
+    this.state.formData.set('GraphType', this.state.graph_mode);
 
   }
 
@@ -66,8 +66,10 @@ class UserInput extends React.Component {
     let func = e.target.value;
     this.state.func = func;
 
-    this.state.formData.append('Function', this.state.func);
-    this.state.formData.append('GraphType', this.state.graph_mode);
+    console.log('what', func);
+
+    this.state.formData.set('Function', this.state.func);
+    this.state.formData.set('GraphType', this.state.graph_mode);
   }
 
   sendGraphInfo = () => {
@@ -113,6 +115,7 @@ class UserInput extends React.Component {
         <Col s={1}>f(x)=</Col>
         <Col s={11}><Input placeholder="x^2 + abs(x)" s={6} onChange ={this.getFunction}/></Col>
         </Row>
+        <p> Note: please import pgfplots as follows: {'\\usepackage{pgfplots}'} in the preamble of your LaTeX document </p>
         <Row>
          <ul>
           <li>Please upload your graph file:</li>
