@@ -11,4 +11,4 @@ How to run: 1. clone this repository into wherever you like.
             3. On node.js, "cd" into where the file "package.json" is, and run "npm run watch"
             4. On your web browser, navigate to "http://localhost:####/" and press "ctrl+shift+'r'" to reload the page.
 
-There are instructions on the website for how to use Graphikz!
+There are instructions on the website for how to use Graphikz! It is suggested that you create your graph drawing in Google Drawings or hand-draw your graphs and take a picture to upload.
