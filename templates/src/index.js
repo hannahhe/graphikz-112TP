@@ -40,6 +40,7 @@ class UserInput extends React.Component {
 
   onChange = (e, val) => { //defines a function, onChange which takes an event and value and takes value and stores it in something
     this.state.graph_mode = val; //storing
+    this.forceUpdate();
   }
 
 
@@ -102,34 +103,52 @@ class UserInput extends React.Component {
             <option value='Function'>Function</option>
           </Input>
         </Row>
-        <Row>
-        <ul>
-        <li> If your GraphType you selected is Graph Theory, how many edges are in your graph? </li>
-        </ul>
-        <Input type="number" label="Number of Edges" s={12} onChange = {this.getNumberOfEdges} />
-        </Row>
-        <ul>
-        <li> If your GraphType you selected is Functions, what is your desired function to plot? </li>
-        </ul>
-        <Row>
-        <Col s={1}>f(x)=</Col>
-        <Col s={11}><Input placeholder="x^2 + abs(x)" s={6} onChange ={this.getFunction}/></Col>
-        </Row>
-        <p> Note: please import pgfplots as follows: {'\\usepackage{pgfplots}'} in the preamble of your LaTeX document </p>
-        <Row>
-         <ul>
-          <li>Please upload your graph file:</li>
-         </ul>
-          <Input type="file" label="Upload File" s={12}
-          onChange={this.getUploadedFileName} />
-          <Button waves='light' onClick = {this.sendGraphInfo}>Submit</Button>
-        </Row>
-        <Row>
-        <ul>
-         <li>It's ready! Please copy your LaTeX Code and paste it into your project!</li>
-        </ul>
-          <Button><i className="fa fa-clipboard" aria-hidden="true" /> <a className = 'white-text' ref={ clipboardRef } data-clipboard-text={this.state.laTeX}>Copy LaTeX</a></Button>
-        </Row>
+        {
+          (this.state.graph_mode && (this.state.graph_mode == 'Scatter Plot')) && (
+            <Row>
+              <ul>
+               <li>Please upload your graph file:</li>
+              </ul>
+             <Input type="file" label="Upload File" s={12} onChange={this.getUploadedFileName} />
+              <Button waves='light' onClick = {this.sendGraphInfo}>Submit</Button>
+            </Row>
+          )
+        }
+        {
+          (this.state.graph_mode && (this.state.graph_mode == 'Graph Theory')) && (
+            <Row>
+              <ul>
+               <li>Please upload your graph file:</li>
+              </ul>
+             <Input type="file" label="Upload File" s={12} onChange={this.getUploadedFileName} />
+             <Input type="number" label="Number of Edges" s={12} onChange = {this.getNumberOfEdges} />
+              <Button waves='light' onClick = {this.sendGraphInfo}>Submit</Button>
+            </Row>
+          )
+        }
+        {
+          (this.state.graph_mode && (this.state.graph_mode == 'Function')) && (
+            <Row>
+            <p> Note: please import pgfplots as follows: {'\\usepackage{pgfplots}'} in the preamble of your LaTeX document </p>
+            <Row>
+            <Col s={1}>f(x)=</Col>
+            <Col s={11}><Input placeholder="x^2 + abs(x)" s={6} onChange ={this.getFunction}/></Col>
+            </Row>
+              <Button waves='light' onClick = {this.sendGraphInfo}>Submit</Button>
+            </Row>
+          )
+        }
+        {
+          this.state.laTeX && (
+            <Row>
+            <ul>
+             <li>It's ready! Please copy your LaTeX Code and paste it into your project!</li>
+            </ul>
+              <Button><i className="fa fa-clipboard" aria-hidden="true" /> <a className = 'white-text' ref={ clipboardRef } data-clipboard-text={this.state.laTeX}>Copy LaTeX</a></Button>
+            </Row>
+          )
+        }
+
       </div>
     );
   }
