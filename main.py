@@ -1,4 +1,5 @@
 import sys
+import copy
 import cv2 as cv
 import numpy as np
 import math
@@ -10,6 +11,87 @@ from tkinter import ttk
 import tkinter as ttk
 
 class GraphTheory(object):
+    def laTeXnodes(self, circles):
+        pointLaTex = ""
+        defaultColor = "black"
+        defaultSize = 5
+        scaledPoints = copy.deepcopy(circles)
+        scalingFactor = 0
+        xCoord = []
+        xAverage = 0
+        xMax = 0
+        xMin = 0
+        xDist = 0
+        yCoord = []
+        yAverage = 0
+        yMax = 0
+        yMin = 0
+        yDist = 0
+        for i in circles[0, :].tolist():
+            xCoord.append(i[0])
+            yCoord.append(i[1])
+        xMax = max(xCoord)
+        xMin = min(xCoord)
+        yMax = max(yCoord)
+        yMin = min(yCoord)
+        xAverage = np.mean(xCoord)
+        yAverage = np.mean(yCoord)
+        scaledPoints = scaledPoints[0, :].tolist()
+        for i in scaledPoints:
+            i[0] -= xAverage
+            i[1] -= yAverage
+        xDist = xMax-xMin
+        yDist = yMax-yMin
+        scalingFactor = max(xDist, yDist)
+        for i in scaledPoints:
+            i[0] /= scalingFactor
+            i[0] *= 5
+            i[1] /= scalingFactor
+            i[1] *= 5
+            i[1] = 5 - i[1]
+            i[2] = defaultSize
+            pointLaTex += "\\node[circle,fill="+defaultColor+",inner sep=0pt,minimum size="+str(i[2])+"pt] at ("+str(i[0])+","+str(i[1])+") {};" + "\n"
+        return [pointLaTex, scaledPoints]
+
+    def laTeXEdges(self, noCircles, lines, circles):
+        circles = circles[0].tolist()
+        actualLines = []
+        img = cv.imread(noCircles)
+        tempPlot = cv.imread(noCircles, cv.IMREAD_COLOR)
+        sum = 0
+        cutoff = 0
+        circlePoints = []
+        for i in range(len(circles)):
+            for j in range(i+1,len(circles)):
+                circlePoints.append([circles[i], circles[j]])
+        print(circlePoints)
+        for pair in circlePoints:
+            pt1 = pair[0]
+            pt2 = pair[1]
+            x1 = pt1[0] #let p be x1,y1 and q be x2,y2
+            y1 = pt1[1]
+            x2 = pt2[0]
+            y2 = pt2[1]
+            p = [x1,y1]
+            q = [x2,y2]
+            for i in range(100):
+                t= i * 0.01
+                d = [pi+t*(qi-pi) for (qi,pi) in zip(q,p)] #q-p
+                d[0] = int(d[0])
+                d[1] = int(d[1])
+                d = tuple(d)
+                cv.circle(tempPlot, d, 10, (255, 0, 255), 3)
+                sum += img[int(d[1]),int(d[0])][0] #r
+                sum += img[int(d[1]),int(d[0])][1] #g
+                sum += img[int(d[1]),int(d[0])][2] #b
+        print(sum)
+        cv.imwrite('tempPlot.jpg', tempPlot)
+            #if(sum < cutoff): # you have a line!
+            #    actualLines.append([x1,y1,x2,y2]) #add the line end points
+            #print(actualLines)
+        return 'hi'
+
+
     def detectPointsAndAxes(self, picFile): #This code is modified from: https://docs.opencv.org/3.4/d4/d70/tutorial_hough_circle.html
         #what file/picture will it look at?
         if(picFile != ""):
@@ -18,6 +100,7 @@ class GraphTheory(object):
             filename = default_file
         # Loads an image
             src = cv.imread(filename, cv.IMREAD_COLOR) #picFile
+            noCircles =  cv.imread(filename, cv.IMREAD_COLOR)
 
             height,width, channels = src.shape #get the height and width of the picture
 
@@ -44,6 +127,7 @@ class GraphTheory(object):
 
             #To draw the detected circles
             #circles = array of [x, y, radius] per each circle detected
+            circleTol = 7
             if circles is not None:
                 circles = np.uint16(np.around(circles))
                 for i in circles[0, :]:
@@ -53,6 +137,9 @@ class GraphTheory(object):
                     # circle outline
                     radius = i[2]
                     cv.circle(src, center, radius, (255, 0, 255), 3)
+                    cv.circle(noCircles, center, radius + circleTol, (255,255,255), -1)
+
+            cv.imwrite('noCircles.jpg', noCircles)
 
             gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
             edges = cv.Canny(gray,50,150,apertureSize = 3) #edge detection
@@ -90,7 +177,6 @@ class GraphTheory(object):
             filteredTheta = [theta[0]]
             sum = filteredTheta[0] + 0.05
             diff = filteredTheta[0] - 0.05
-            print("theta", theta)
             for i in range(len(theta)):
                 if(theta[i] < sum and theta[i] > diff):
                     pass
@@ -98,12 +184,10 @@ class GraphTheory(object):
                     filteredTheta.append(theta[i])
                     sum = filteredTheta[-1] + 0.05
                     diff = filteredTheta[-1] - 0.05
-            print("filter", filteredTheta)
             filteredLines = []
 
             for i in range(len(filteredTheta)):
                 filteredLines.append([mappings[filteredTheta[i]],filteredTheta[i]])
-            print(filteredLines)
 
             #you can also filter by rho
             '''rho = []
@@ -146,19 +230,21 @@ class GraphTheory(object):
 
                 cv.line(src,(x1,y1),(x2,y2),(0,0,255),2)
 
+            cv.imwrite('linesAndPoints.jpg', src)
 
             #Start building the LaTeX code:
             laTexCode = "\\begin{figure}"+"\n"+"\centering" + "\n" + "\\begin{tikzpicture}"+"\n"
             #laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin)[0] #add axes
             #x_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[1] #get the length of axes: important for scaling points
             #y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
-            #laTexCode += self.laTexPoints(laTexCode, circles, width, height, origin, x_axis_length, y_axis_length) #add points
+            laTexCode += self.laTeXnodes(circles)[0] #add points
+            scaledPoints = self.laTeXnodes(circles)[1]
+            laTexCode += self.laTeXEdges('noCircles.jpg', lines, circles)
             #when you're all done:
             laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
             #Write the code to a .tex file so the user can download it
             with open('yourLatexFile.tex', 'w') as fp:
                 fp.write(laTexCode)
-            cv.imwrite('linesAndPoints.jpg', src)
             cv.waitKey(0)
 
         return laTexCode
@@ -328,10 +414,10 @@ class ScatterPlot(object):
 
             #Start building the LaTeX code:
             laTexCode = "\\begin{figure}"+"\n"+"\centering" + "\n" + "\\begin{tikzpicture}"+"\n"
-            #laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin)[0] #add axes
-            #x_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[1] #get the length of axes: important for scaling points
-            #y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
-            #laTexCode += self.laTexPoints(laTexCode, circles, width, height, origin, x_axis_length, y_axis_length) #add points
+            laTexCode += self.laTexAxes(laTexCode, lines, height, width, origin)[0] #add axes
+            x_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[1] #get the length of axes: important for scaling points
+            y_axis_length = self.laTexAxes(laTexCode, lines, height, width, origin)[2]
+            laTexCode += self.laTexPoints(laTexCode, circles, width, height, origin, x_axis_length, y_axis_length) #add points
             #when you're all done:
             laTexCode += "\end{tikzpicture}" + "\n" +"\end{figure}" + "\n"
             #Write the code to a .tex file so the user can download it
