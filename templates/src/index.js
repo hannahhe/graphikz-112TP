@@ -5,7 +5,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import Clipboard from "clipboard";
 
-import { Dropdown, Button, NavItem, Modal, Row, Input } from "react-materialize";
+import { Dropdown, Button, NavItem, Modal, Row, Col, Input } from "react-materialize";
 
 import Hannah from "./hannah";
 
@@ -59,7 +59,15 @@ class UserInput extends React.Component {
     this.state.formData.append('NumEdges', this.state.num_edges);
     this.state.formData.append('GraphType', this.state.graph_mode);
 
-    console.log(this.state.formData);
+  }
+
+
+  getFunction = (e) => {  //get the number of edges
+    let func = e.target.value;
+    this.state.func = func;
+
+    this.state.formData.append('Function', this.state.func);
+    this.state.formData.append('GraphType', this.state.graph_mode);
   }
 
   sendGraphInfo = () => {
@@ -89,6 +97,7 @@ class UserInput extends React.Component {
             <option value='1'>Select...</option>
             <option value='Scatter Plot'>Scatter Plot</option>
             <option value='Graph Theory'>Graph Theory</option>
+            <option value='Function'>Function</option>
           </Input>
         </Row>
         <Row>
@@ -96,6 +105,13 @@ class UserInput extends React.Component {
         <li> If your GraphType you selected is Graph Theory, how many edges are in your graph? </li>
         </ul>
         <Input type="number" label="Number of Edges" s={12} onChange = {this.getNumberOfEdges} />
+        </Row>
+        <ul>
+        <li> If your GraphType you selected is Functions, what is your desired function to plot? </li>
+        </ul>
+        <Row>
+        <Col s={1}>f(x)=</Col>
+        <Col s={11}><Input placeholder="x^2 + abs(x)" s={6} onChange ={this.getFunction}/></Col>
         </Row>
         <Row>
          <ul>

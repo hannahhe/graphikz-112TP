@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from main import ScatterPlot, GraphTheory
+from main import ScatterPlot, GraphTheory, Function
 import io
 import numpy as np
 import cv2
@@ -20,6 +20,9 @@ def graph(): #files are different from other things: if you wanted to send the f
     if(request.form["GraphType"] == "Graph Theory"):
         graph1 = GraphTheory()
         numEdges = int(request.form["NumEdges"])
+    if(request.form["GraphType"] == "Function"):
+        graph1 = Function()
+        func = request.form["Function"]
         # Here is the code to convert the post request to an OpenCV object via https://gist.github.com/mjul/32d697b734e7e9171cdb
         if request.method == 'PUT' and 'GraphImage' in request.files:
             photo = request.files['GraphImage']
@@ -32,6 +35,8 @@ def graph(): #files are different from other things: if you wanted to send the f
             laTexCode = graph1.detectPointsAndAxes(img, numEdges)
         if(isinstance(graph1, ScatterPlot)):
             laTexCode = graph1.detectPointsAndAxes(img)
+        if(isinstance(graph1, Function)):
+            laTexCode = graph1.plotFunction(func)
 
 
     return jsonify({'latex': laTexCode}) #jsonify: turns python dictionaries into json

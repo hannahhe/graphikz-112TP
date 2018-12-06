@@ -10,6 +10,14 @@ from PIL import ImageTk,Image
 from tkinter import ttk
 import tkinter as ttk
 
+class Function(object):
+    def plotFunction(self, func):
+        laTeXCode = "\\begin{tikzpicture}[domain=0:4]" + "\n" + "\\draw[very thin,color=gray] (-0.1,-1.1) grid (3.9,3.9);"+ "\n"+ \
+                    "\\draw[->] (-0.2,0) -- (4.2,0) node[right] {$x$};"+"\n" + "\\draw[->] (0,-1.2) -- (0,4.2) node[above] {$f(x)$};" + \
+                    "\\draw[] plot[] function{"+func+"};" + "\n" + "\\end{tikzpicture}"
+        return laTeXCode
+
+
 class GraphTheory(object):
     def laTeXnodes(self, circles):
         pointLaTex = ""
